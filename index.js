@@ -180,20 +180,31 @@ async function aliFetch(url, body, header) {
     ...(authHeader || {}),
     ...(header || {}),
   };
-  const rsp = await fetch(url, {
-    method: "POST",
-    body: JSON.stringify(body),
-    headers,
-  });
-  const data = await rsp.json();
-  log.trace(
-    { url, headers, body, rsp: data, rspHeaders: rsp.headers },
-    "aliyun post"
-  );
-  if (data.code && data.message) {
-    throw new Error(data.message);
+  let error;
+  for (let retry = 0; retry < 3; retry++) {
+    try {
+      const rsp = await fetch(url, {
+        method: "POST",
+        body: JSON.stringify(body),
+        headers,
+      });
+      const data = await rsp.json();
+      log.trace(
+        { url, headers, body, rsp: data, rspHeaders: rsp.headers },
+        "aliyun post"
+      );
+      if (data.code && data.message) {
+        error = new Error(data.message);
+        break;
+      }
+      return data;
+    } catch (err) {
+      error = err;
+      log.error({ err }, "Unexpected Error");
+      await new Promise((r) => setTimeout(r, 5000));
+    }
   }
-  return data;
+  throw error;
 }
 
 /**
