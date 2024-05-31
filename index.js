@@ -119,7 +119,7 @@ async function startFetchTask(tasks, localdir, limit) {
 
 function filterFilesNeedFetched(list, local) {
   const needfilter = {};
-  for (let file in list) {
+  for (let file of list) {
     const localpath = require("path").join(local, file.path);
     if (
       require("fs").existsSync(localpath) &&
@@ -128,7 +128,7 @@ function filterFilesNeedFetched(list, local) {
       needfilter[file.file_id] = true;
     }
   }
-  return tree.filter((f) => !needfilter[f.file_id]);
+  return list.filter((f) => !needfilter[f.file_id]);
 }
 
 function GetSignature(nonce, user_id, deviceId) {
