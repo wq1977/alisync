@@ -11,7 +11,7 @@ const log = require("./log")("main");
 
 async function main() {
   const localdir = process.argv[2];
-  const FETCH_COUNT = 1;
+  const FETCH_COUNT = 2;
   const fetchTasks = {};
   startFetchTask(fetchTasks, localdir, FETCH_COUNT);
   while (true) {
