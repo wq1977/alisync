@@ -58,7 +58,14 @@ async function startFetchTask(tasks, localdir, limit) {
     running = running.filter((r) => !r.done);
     // if running less than limit, add more task
     while (running.length < limit && Object.keys(tasks).length) {
-      const file_id = Object.keys(tasks)[0];
+      const runningids = running.reduce((r, i) => {
+        r[i.file_id] = true;
+        return r;
+      }, {});
+      const file_id = Object.keys(tasks).filter(
+        (fileid) => !runningids[fileid]
+      )[0];
+      if (!file_id) break;
       const file = tasks[file_id];
       const info = await aliFetch(
         "https://open.aliyundrive.com/adrive/v1.0/openFile/getDownloadUrl",
