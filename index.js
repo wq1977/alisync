@@ -1,6 +1,6 @@
 /**
  *
- * 阿里云盘同步工具，
+ * 阿里云盘同步工具
  *
  */
 const { SHA256 } = require("crypto-js");
@@ -186,7 +186,7 @@ async function aliFetch(url, body, header) {
     headers,
   });
   const data = await rsp.json();
-  log.info(
+  log.trace(
     { url, headers, body, rsp: data, rspHeaders: rsp.headers },
     "aliyun post"
   );
@@ -260,6 +260,7 @@ async function refreshRemoteTree() {
 async function fetchFiles(files, tasks) {
   for (let file of files) {
     if (tasks[file.file_id]) continue;
+    log.info({ name: file.name }, "新发现需要下载的文件");
     tasks[file.file_id] = { ...file };
   }
 }
