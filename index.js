@@ -15,11 +15,15 @@ async function main() {
   const fetchTasks = {};
   startFetchTask(fetchTasks, localdir, FETCH_COUNT);
   while (true) {
-    const accessToken = await refreshToken();
-    const remoteTree = await refreshRemoteTree(accessToken);
-    const fetchList = filterFilesNeedFetched(remoteTree, localdir);
-    if (fetchList.length > 0) {
-      await fetchFiles(fetchList, fetchTasks);
+    try {
+      const accessToken = await refreshToken();
+      const remoteTree = await refreshRemoteTree(accessToken);
+      const fetchList = filterFilesNeedFetched(remoteTree, localdir);
+      if (fetchList.length > 0) {
+        await fetchFiles(fetchList, fetchTasks);
+      }
+    } catch (err) {
+      log.error({ err }, "unexpected error");
     }
     log.info("sleep 1 min(s)");
     await new Promise((r) => setTimeout(r, 60 * 1000));
