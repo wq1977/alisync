@@ -51,7 +51,7 @@ async function startFetchTask(tasks, localdir, limit) {
     for (let run of running) {
       if (run.done) {
         log.info({ name: run.name }, "success");
-        await deleleRemote(task);
+        await deleleRemote(run);
       } else if (run.code) {
         log.info({ name: run.name, code: run.code }, "fail");
       } else {
@@ -153,6 +153,7 @@ function filterFilesNeedFetched(list, local) {
       require("fs").existsSync(localpath) &&
       !require("fs").existsSync(`${localpath}.aria2`)
     ) {
+      deleleRemote(file);
       needfilter[file.file_id] = true;
     }
   }
