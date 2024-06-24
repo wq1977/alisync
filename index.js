@@ -281,7 +281,7 @@ async function refreshRemoteTree() {
         order_direction: "ASC",
       }
     );
-    if (files.length == 0) {
+    if (files.length == 0 && dir_id != "root") {
       await deleleRemote({
         drive_id: default_drive_id,
         file_id: dir_id,
