@@ -32,6 +32,17 @@ async function main() {
   }
 }
 
+async function deleleRemote(task) {
+  const info = await aliFetch(
+    "https://open.aliyundrive.com/adrive/v1.0/file/delete",
+    {
+      drive_id: task.drive_id,
+      file_id: task.file_id,
+    }
+  );
+  log.info({ info }, "delete remote file");
+}
+
 async function startFetchTask(tasks, localdir, limit) {
   let running = [];
   const { spawn } = require("child_process");
@@ -40,6 +51,7 @@ async function startFetchTask(tasks, localdir, limit) {
     for (let run of running) {
       if (run.done) {
         log.info({ name: run.name }, "success");
+        await deleleRemote(task);
       } else if (run.code) {
         log.info({ name: run.name, code: run.code }, "fail");
       } else {
@@ -269,6 +281,12 @@ async function refreshRemoteTree() {
         order_direction: "ASC",
       }
     );
+    if (files.length == 0) {
+      await deleleRemote({
+        drive_id: default_drive_id,
+        file_id: dir_id,
+      });
+    }
     for (let item of files.items) {
       const itempath = `${path}/${item.name}`;
       if (item.trashed || item.deleted) continue;
