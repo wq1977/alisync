@@ -48,7 +48,7 @@ async function deleleRemote(task) {
     ],
     resource: "file",
   });
-  log.info({ info }, "delete remote file");
+  log.info({ info, task }, "delete remote file");
 }
 
 async function startFetchTask(tasks, localdir, limit) {
@@ -309,8 +309,9 @@ async function refreshRemoteTree() {
         order_direction: "ASC",
       }
     );
-    if (files.length == 0 && dir_id != "root") {
+    if (files.items.length == 0 && dir_id != "root") {
       await deleleRemote({
+        name: path,
         drive_id: default_drive_id,
         file_id: dir_id,
       });
