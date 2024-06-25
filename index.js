@@ -200,23 +200,43 @@ function GetSignature(nonce, user_id, deviceId) {
 async function aliFetch(url, body, header) {
   let authHeader;
   if (!url.endsWith("/token")) {
-    const { user_id, access_token } = JSON.parse(
+    const { open, v2 } = JSON.parse(
       require("fs").readFileSync("./token.json").toString()
     );
+    const user_id = v2.user_id;
     const deviceid = getUuid(user_id, 5);
     const { signature, publicKey } = GetSignature(0, user_id, deviceid);
     authHeader = {
-      Authorization: `Bearer ${access_token}`,
+      Authorization: `Bearer ${
+        url.startsWith("https://api.aliyundrive.com/")
+          ? v2.access_token
+          : open.access_token
+      }`,
       "x-request-id": v4().toString(),
       "x-device-id": getUuid(deviceid, 5),
       "x-signature": signature,
     };
+  } else {
+    authHeader = {
+      referer: "https://www.aliyundrive.com/",
+    };
   }
   const headers = {
     "content-type": "application/json",
+    accept: "application/json, text/plain, */*",
+    "accept-encoding": "gzip, deflate, br",
+    "accept-language": "zh-CN,zh;q=0.9",
+    "sec-ch-ua": '"Not;A=Brand";v="99", "Chromium";v="106"',
+    "sec-ch-ua-platform": '"macOS"',
+    "x-canary": "client=windows,app=adrive,version=v4.1.0",
+    "sec-fetch-mode": "cors",
+    "sec-fetch-site": "cross-site",
+    "user-agent":
+      "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) aDrive/4.1.0 Chrome/108.0.5359.215 Electron/22.3.1 Safari/537.36",
     ...(authHeader || {}),
     ...(header || {}),
   };
+  console.log("fetch", url, JSON.stringify(body), JSON.stringify(headers));
   let error;
   for (let retry = 0; retry < 3; retry++) {
     try {
@@ -226,7 +246,7 @@ async function aliFetch(url, body, header) {
         headers,
       });
       const data = await rsp.json();
-      log.trace(
+      log.info(
         { url, headers, body, rsp: data, rspHeaders: rsp.headers },
         "aliyun post"
       );
@@ -251,27 +271,31 @@ async function refreshToken() {
   if (!require("fs").existsSync("./token.json")) {
     throw new Error("No Token");
   }
-  const token = JSON.parse(
-    require("fs").readFileSync("./token.json").toString()
-  );
+  const db = JSON.parse(require("fs").readFileSync("./token.json").toString());
   const now = new Date().getTime();
-  if (token.validat && token.validat - now > 10 * 60 * 1000) {
-    return token.access_token;
+  if (db.validat && db.validat - now > 10 * 60 * 1000) {
+    return db;
   }
 
-  const data = await aliFetch("https:///api-cf.nn.ci/alist/ali_open/token", {
-    refresh_token: token.refresh_token,
+  const open = await aliFetch("https:///api-cf.nn.ci/alist/ali_open/token", {
+    refresh_token: db.open.refresh_token,
     grant_type: "refresh_token",
   });
-  require("fs").writeFileSync(
-    "./token.json",
-    JSON.stringify({
-      ...token,
-      ...data,
-      validat: new Date().getTime() + data.expires_in * 1000,
-    })
-  );
-  return data.access_token;
+
+  const v2 = await aliFetch("https://auth.aliyundrive.com/v2/account/token", {
+    refresh_token: db.v2.refresh_token,
+    grant_type: "refresh_token",
+  });
+
+  const data = {
+    ...db,
+    open,
+    v2,
+    validat: new Date().getTime() + open.expires_in * 1000,
+  };
+
+  require("fs").writeFileSync("./token.json", JSON.stringify(data));
+  return data;
 }
 
 async function refreshRemoteTree() {
