@@ -33,7 +33,22 @@ async function main() {
 }
 
 async function deleleRemote(task) {
-  //TODO
+  const info = await aliFetch("https://api.aliyundrive.com/v2/batch", {
+    requests: [
+      {
+        body: {
+          drive_id: task.drive_id,
+          file_id: task.file_id,
+        },
+        headers: { "Content-Type": "application/json" },
+        id: task.file_id,
+        method: "POST",
+        url: "/file/delete",
+      },
+    ],
+    resource: "file",
+  });
+  log.info({ info }, "delete remote file");
 }
 
 async function startFetchTask(tasks, localdir, limit) {
