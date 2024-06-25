@@ -236,7 +236,6 @@ async function aliFetch(url, body, header) {
     ...(authHeader || {}),
     ...(header || {}),
   };
-  console.log("fetch", url, JSON.stringify(body), JSON.stringify(headers));
   let error;
   for (let retry = 0; retry < 3; retry++) {
     try {
@@ -246,10 +245,6 @@ async function aliFetch(url, body, header) {
         headers,
       });
       const data = await rsp.json();
-      log.info(
-        { url, headers, body, rsp: data, rspHeaders: rsp.headers },
-        "aliyun post"
-      );
       if (data.code && data.message) {
         error = new Error(data.message);
         break;
