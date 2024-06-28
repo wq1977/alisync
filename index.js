@@ -310,11 +310,12 @@ async function refreshRemoteTree() {
       }
     );
     if (files.items.length == 0 && dir_id != "root") {
-      await deleleRemote({
-        name: path,
-        drive_id: default_drive_id,
-        file_id: dir_id,
-      });
+      // no need to delete empty folder, so we can download new ep to same folder
+      // await deleleRemote({
+      //   name: path,
+      //   drive_id: default_drive_id,
+      //   file_id: dir_id,
+      // });
     }
     for (let item of files.items) {
       const itempath = `${path}/${item.name}`;
