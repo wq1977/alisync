@@ -26,9 +26,9 @@ async function main() {
       log.error({ err }, "unexpected error");
     }
     if (Object.keys(fetchTasks).length == 0) {
-      log.info("sleep 1 min(s)");
+      log.info("sleep 3 min(s)");
     }
-    await new Promise((r) => setTimeout(r, 60 * 1000));
+    await new Promise((r) => setTimeout(r, 60 * 3000));
   }
 }
 
