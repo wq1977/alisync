@@ -33,6 +33,9 @@ async function main() {
 }
 
 async function deleleRemote(task) {
+  if (task.path.startsWith("/keep/")) {
+    return;
+  }
   const info = await aliFetch("https://api.aliyundrive.com/v2/batch", {
     requests: [
       {
