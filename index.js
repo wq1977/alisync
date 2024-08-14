@@ -161,6 +161,7 @@ function filterFilesNeedFetched(list, local) {
   for (let file of list) {
     const localpath = require("path").join(local, file.path);
     if (
+      !file.path.startsWith("/keep/") &&
       require("fs").existsSync(localpath) &&
       !require("fs").existsSync(`${localpath}.aria2`)
     ) {
